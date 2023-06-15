@@ -8,7 +8,24 @@ const { query } = require('express');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const port = process.env.PORT || 5000;
 
+// Middlewares;
+// const whitelist = [
+// 	'http://localhost:3000/',
+// 	'https://https://dorctors-portrals.web.app/',
+// 	'https://doctors-portal-demos.netlify.app/',
+// ];
+// const corsOptions = {
+// 	origin: function (origin, callback) {
+// 		if (!origin || whitelist.indexOf(origin) !== -1) {
+// 			callback(null, true);
+// 		} else {
+// 			callback(new Error('Not allowed by CORS'));
+// 		}
+// 	},
+// 	credentials: true,
+// };
 app.use(cors());
+// app.use(cors());
 app.use(express.json());
 
 app.get('/', (req, res) => {
@@ -266,7 +283,7 @@ const run = async () => {
 			res.send({ isAdmin: user?.role === 'admin' });
 		});
 		app.put('/users/addmin/:id', verifyJWT, verifyAmin, async (req, res) => {
-			const filter = { _id: ObjectId(id) };
+			const filter = { _id: ObjectId(req.params.id) };
 			const option = { upsert: true };
 			const updatedDoc = {
 				$set: {
@@ -278,6 +295,13 @@ const run = async () => {
 				updatedDoc,
 				option
 			);
+
+			res.send(result);
+		});
+		app.delete('/users/addmin/:id', verifyJWT, verifyAmin, async (req, res) => {
+			const filter = { _id: ObjectId(req.params.id) };
+
+			const result = await usersCollection.findOneAndDelete(filter);
 
 			res.send(result);
 		});
